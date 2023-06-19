@@ -1,0 +1,94 @@
+import tkinter as tk
+from tkinter import messagebox
+
+# Tworzenie okna głównego
+okno = tk.Tk()
+okno.title("KÓŁKO I KRZYŻYK")
+
+# Tworzenie planszy
+plansza = [[" ", " ", " "],
+         [" ", " ", " "],
+         [" ", " ", " "]]
+
+biezacy_gracz = "X"  # Rozpoczyna gracz X
+game_over = False
+teskt_wyniku = ""
+
+# Funkcja do obsługi kliknięcia na pole planszy
+def klik_myszka(row, col):
+    global biezacy_gracz, game_over, teskt_wyniku
+
+    if not game_over and plansza[row][col] == " ":
+        plansza[row][col] = biezacy_gracz
+        przycisk = przycisk_planszy[row][col]        
+        przycisk.config(text=biezacy_gracz)
+
+        if biezacy_gracz == "X":
+            przycisk.config(bg="#FA8072")  # Ustawienie koloru tła przycisku X
+        else:
+            przycisk.config(bg="#00FF00")   # Ustawienie koloru tła przycisku X
+
+        if sprawdz_zwyciezce():
+            teskt_wyniku=f"Gracz {biezacy_gracz} wygrał!"
+            graj_ponownie()
+        elif sprawdz_remis():
+            teskt_wyniku = "Remis!"
+            graj_ponownie()
+        else:
+            biezacy_gracz = "O" if biezacy_gracz == "X" else "X"
+
+# Funkcja do sprawdzania, czy jest zwycięzca
+def sprawdz_zwyciezce():
+    # Sprawdzanie wierszy
+    for row in plansza:
+        if row[0] == row[1] == row[2] != " ":
+            return True
+
+    # Sprawdzanie kolumn
+    for col in range(3):
+        if plansza[0][col] == plansza[1][col] == plansza[2][col] != " ":
+            return True
+
+    # Sprawdzanie przekątnych
+    if (plansza[0][0] == plansza[1][1] == plansza[2][2] != " ") or (plansza[0][2] == plansza[1][1] == plansza[2][0] != " "):
+        return True
+
+    return False
+
+# Funkcja do sprawdzania remisu
+def sprawdz_remis():
+    for row in plansza:
+        if " " in row:
+            return False
+    return True
+
+def graj_ponownie():
+    global biezacy_gracz, teskt_wyniku
+    odpowiedz = messagebox.askquestion(teskt_wyniku, "Czy chcesz zagrać jeszcze raz?")
+    if odpowiedz == "yes":
+        # Zresetuj planszę
+        for row in range(3):
+            for col in range(3):
+                plansza[row][col] = " "
+                przycisk = przycisk_planszy[row][col]
+                przycisk.config(text=" ", bg="SystemButtonFace")
+
+        # Zresetuj stan gry
+        biezacy_gracz = "X"
+        game_over = False
+    else:
+        okno.destroy()
+
+# Tworzenie przycisków planszy
+przycisk_planszy = []
+for row in range(3):
+    button_row = []
+    for col in range(3):
+        przycisk = tk.Button(okno, text=" ", width=10, height=5,
+                           command=lambda r=row, c=col: klik_myszka(r, c))
+        przycisk.grid(row=row, column=col, padx=5, pady=5)
+        button_row.append(przycisk)
+    przycisk_planszy.append(button_row)
+
+# Uruchamianie głównej pętli programu
+okno.mainloop()
